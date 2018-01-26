@@ -1,0 +1,124 @@
+<!doctype html>
+<html>
+  <head>
+    <title>$BMT Giveaway</title>
+
+    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+    <script src="//code.jquery.com/jquery-1.10.2.min.js"></script>
+
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      html, body {
+        background: #efefef;
+        margin: 0;
+        padding: 20px;
+        font-family: 'Roboto';
+      }
+
+      h1 {
+        text-align: center;
+        margin: 0;
+        padding: 0;
+        margin-bottom: 30px;
+        cursor: pointer;
+      }
+
+      .content-list {
+        list-style-type: none;
+        margin: 0;
+        padding: 0 15px;
+        max-width: 600px;
+        background: white;
+        margin: 20px auto;
+      }
+
+      .content-list li {
+        cursor: pointer;
+        font-size: 22px;
+        padding: 10px 0;
+      }
+
+      .content-list li:not(:last-child) {
+        border-bottom: 2px solid #efefef;
+      }
+
+      .content-list li[data-giveaway] {
+        text-align: right;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>$BMT Giveaway</h1>
+
+    <ul class="content-list">
+
+    </ul>
+
+    <script>
+      $(function() {
+        $.ajax({
+          url: 'https://api.meetup.com/bmtcrypto/events?callback=?&sign=true&key=f18782232574b6b5a442515b3e5632',
+          type: 'GET',
+          dataType: 'JSON',
+          success: function(d) {
+            var _data = d.data;
+
+            _data.map(function(m) {
+              $('.content-list').append('<li data-meetup-id="' + m.id + '">' + m.name + '</li>');
+            });
+          }
+        });
+
+        $(document).on('click', '.content-list li[data-meetup-id]', function(e) {
+          e.preventDefault();
+
+          $.ajax({
+            url: 'https://api.meetup.com/bmtcrypto/events/' + $(this).attr('data-meetup-id') + '/rsvps?callback=?&sign=true&key=f18782232574b6b5a442515b3e5632',
+            type: 'GET',
+            dataType: 'JSON',
+            success: function(d) {
+              var _data = d.data.map(function(m) { return m.member });;
+
+              $('.content-list').html('');
+
+              _data.map(function(m) {
+                $('.content-list').append('<li data-member-id="' + m.id + '">' + m.name + '</li>');
+              });
+
+              $('.content-list').append('<li data-giveaway>Choose Winner</li>');
+            }
+          });
+
+          return false;
+        });
+
+        $(document).on('click', '.content-list li[data-member-id]', function(e) {
+          e.preventDefault();
+
+          $(this).remove();
+
+          return false;
+        });
+
+        $(document).on('click', '.content-list li[data-giveaway]', function(e) {
+          e.preventDefault();
+
+          var name_array = $('.content-list > li[data-member-id]').map(function() { return $(this).text() });
+
+          var winner = name_array[Math.floor(Math.random() * name_array.length)];
+
+          $('.content-list').html('<li>' + winner + '</li>');
+
+          return false;
+        });
+
+        $('h1').on('click', function() {
+          window.location.reload();
+        });
+      });
+    </script>
+  </body>
+</html>
